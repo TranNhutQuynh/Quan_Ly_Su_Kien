@@ -1,51 +1,48 @@
 <?php
-    include_once __DIR__."/../models/DKsukien.php";
+session_start();
+require_once __DIR__.'/../models/DKsukien.php';
 
-    class NguoiDungController{
-        private $DKsukienModel;
+class NguoiDungController {
+    public function DKSuKien() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Lấy dữ liệu từ form
+            $tenSK = $_POST['ten_sk'] ?? '';
+            $loaiSK = $_POST['loai_sk'] ?? '';
+            $tenND = $_POST['ten_kh'] ?? '';
+            $sdt = $_POST['sdt'] ?? '';
+            $diaDiem = $_POST['noi_to_chuc'] ?? '';
+            $ngayBD_raw = $_POST['ngay_bd'] ?? '';
+            $ngayKT_raw = $_POST['ngay_kt'] ?? '';
+            $soNguoi = $_POST['nguoi_tham_gia'] ?? 0;
+            $ghiChu = $_POST['ghi_chu'] ?? '';
 
-        public function __construct()
-        {
-            $this->DKsukienModel = new DKSuKien();
-        }
+            // Chuyển định dạng ngày tháng cho MySQL
+            try {
+                $ngayBD = (new DateTime($ngayBD_raw))->format('Y-m-d H:i:s');
+                $ngayKT = (new DateTime($ngayKT_raw))->format('Y-m-d H:i:s');
+            } catch (Exception $e) {
+                die("Lỗi định dạng ngày tháng.");
+            }
 
-        //xử lý đăng ký sự kiện
-        public function DKSuKien(){
-            if($_SERVER['REQUEST_METHOD'] == "POST"){
-                $requireFields = ['ten_kh', 'sdt', 'noi_to_chuc', 'ten_sk', 'ngay_bd', 'ngay_kt', 'loai_sk', 'nguoi_tham_gia'];
+            // Gọi model để thêm dữ liệu
+            $model = new DKSuKien();
+            $result = $model->themSuKien($tenSK, $loaiSK, $tenND, $sdt, $diaDiem, $ngayBD, $ngayKT, $soNguoi, $ghiChu);
 
-                foreach($requireFields as $fields){
-                    if(!isset($_POST[$fields]) || empty($_POST[$fields])){
-                        die("Vui lòng điền đầy đủ thông tin!");
-                    }
-                }
-                // lấy dữ liệu từ Form
-                $ten_kh = $_POST['ten_kh'];
-                $sdt = $_POST['sdt'];
-                $noi_to_chuc = $_POST['noi_to_chuc'];
-                $ten_sk = $_POST['ten_sk'];
-                $ngay_bd = $_POST['ngay_bd'];
-                $ngay_kt = $_POST['ngay_kt'];
-                $loai_sk = $_POST['loai_sk'];
-                $nguoi_tham_gia = $_POST['nguoi_tham_gia'];
-
-                //thêm vào CSDL
-                if($this->DKsukienModel->themSuKien($ten_sk, $loai_sk, $ten_kh, $sdt, $noi_to_chuc, $ngay_bd, $ngay_kt, $nguoi_tham_gia)){
-                    //chuyển hướng đến trang thanh toán
-                    $ma_sk = $this->DKsukienModel->getConn()->insert_id;
-                    if ($ma_sk == 0) {
-                        die("Không thể lấy mã sự kiện!");
-                    }
-                    header("Location: thanhtoan.php?ma_sk=$ma_sk");
+            if ($result) {
+                // lưu thông tin vào seesion
+                $_SESSION['ten_sk'] = $tenSK;
+                $_SESSION['ten_kh'] = $tenND;
+                echo "<script>
+                alert('Đăng ký thành công!');
+                console.log(window.location.href); // sẽ in ra đường dẫn
+                window.location.href = '/Quan_Ly_Su_Kien/app/views/ThanhToan/thanhtoan.php';
+            </script>";
+            
                     exit();
-                }
-            }else{
-                die("Đăng ký thất bại!");
+            } else {
+                echo "<script>alert('Đăng ký thất bại!');</script>";
             }
         }
     }
-
-    //xử lý Request
-    $controller = new NguoiDungController();
-    
+}
 ?>
