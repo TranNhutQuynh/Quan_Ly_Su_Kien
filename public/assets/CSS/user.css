@@ -17,7 +17,7 @@ body {
   width: 100%;
   z-index: 9999; /* Đảm bảo navbar luôn ở trên cùng */
   background: var(--bg-gradient);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(57, 2, 255, 0.1);
 }
 
 

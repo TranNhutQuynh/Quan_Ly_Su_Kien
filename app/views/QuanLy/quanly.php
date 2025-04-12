@@ -1,3 +1,17 @@
+<?php
+include __DIR__ . '/../../models/database.php';
+
+// Test kết nối
+if ($conn->ping()) {
+  echo "Kết nối database thành công!";
+} else {
+  die("Lỗi kết nối: " . $conn->error);
+}
+
+// Truy vấn dữ liệu
+$sql = "SELECT * FROM su_kien";
+$result = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>

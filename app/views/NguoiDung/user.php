@@ -1,3 +1,18 @@
+<?php
+// Nhúng model và controller
+include_once __DIR__ . "/../../models/DKsukien.php";
+include __DIR__ . "/../../controllers/NguoiDungController.php";
+
+// Tạo đối tượng controller
+$controller = new NguoiDungController();
+
+// Xử lý khi form được submit
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    $controller->DKSuKien();
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
   <head>
@@ -8,7 +23,7 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/Quan_Ly_Su_Kien/public/assets/CSS/user.css" />
+    <link rel="stylesheet" href="../public/assets/CSS/user.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -51,50 +66,46 @@
         <!-- Đăng ký sự kiện -->
         <div class="tab-pane fade show active" id="registerEvent">
           <div class="container">
-            <div class="alert alert-success alert-dismissible fade" id="successAlert" role="alert">
-              <i class="fas fa-check-circle me-2"></i> Đăng ký sự kiện thành công! Bạn sẽ được chuyển đến trang thanh toán.
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Đăng ký sự kiện mới</h5>
               </div>
               <div class="card-body">
-                <form id="eventRegistrationForm">
+                <form id="eventRegistrationForm" action="../app/controllers/NguoiDungController.php" method="POST">
                   <div class="row mb-3">
                     <div class="col-md-6">
                       <label class="form-label">Tên người đăng ký</label>
-                      <input type="text" class="form-control" required />
+                      <input name="ten_kh" type="text" class="form-control" required />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label">Số điện thoại</label>
-                      <input type="tel" class="form-control" pattern="[0-9]{10}" required />
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <div class="col-md-6">
-                      <label class="form-label">Nơi tổ chức</label>
-                      <input type="text" class="form-control" required />
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label">Tên sự kiện</label>
-                      <input type="text" class="form-control" required />
+                      <label class="form-label" >Số điện thoại</label>
+                      <input name="sdt" type="tel" class="form-control" pattern="[0-9]{10}" required />
                     </div>
                   </div>
                   <div class="row mb-3">
                     <div class="col-md-6">
-                      <label class="form-label">Thời gian bắt đầu</label>
-                      <input type="datetime-local" class="form-control" required />
+                      <label class="form-label" >Nơi tổ chức</label>
+                      <input name="noi_to_chuc" type="text" class="form-control" required />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label">Thời gian kết thúc</label>
-                      <input type="datetime-local" class="form-control" required />
+                      <label class="form-label" >Tên sự kiện</label>
+                      <input name="ten_sk" type="text" class="form-control" required />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label" >Thời gian bắt đầu</label>
+                      <input name="ngay_bd" type="datetime-local" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" >Thời gian kết thúc</label>
+                      <input name="ngay_kt" type="datetime-local" class="form-control" required />
                     </div>
                   </div>
                   <div class="row mb-3">
                     <div class="col-md-6">
                       <label class="form-label">Loại sự kiện</label>
-                      <select class="form-select" id="eventType" required>
+                      <select class="form-select" id="eventType" name="loai_sk" required>
                         <option value="">-- Chọn loại sự kiện --</option>
                         <option value="hoinghi" data-price="15000000">Hội nghị</option>
                         <option value="tieccuoi" data-price="45000000">Tiệc cưới</option>
@@ -108,7 +119,7 @@
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">Số lượng người tham dự (dự kiến)</label>
-                      <input type="number" class="form-control" id="attendees" min="1" required />
+                      <input name="nguoi_tham_gia" type="number" class="form-control" id="attendees" min="1" required />
                     </div>
                   </div>
                   <div class="mb-3" id="priceInfoContainer" style="display: none">
