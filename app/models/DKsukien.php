@@ -1,9 +1,11 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // DKsukien.php
 require_once __DIR__ . '/../database.php'; // Đảm bảo đúng đường dẫn
 
-class DKSuKien {
+class DKsukien {
     private $conn;
 
     public function __construct() {
@@ -19,10 +21,6 @@ class DKSuKien {
         if (!$stmt) {
             return false;
         }
-
-        // Định dạng lại ngày cho đúng kiểu MySQL: 'Y-m-d H:i:s'
-        $ngayBatDauFormatted = date("Y-m-d H:i:s", strtotime($ngay_bd));
-        $ngayKetThucFormatted = date("Y-m-d H:i:s", strtotime($ngay_kt));
 
         $stmt->bind_param("sssssssi", $ten_sk, $loai_sk, $ten_kh, $sdt, $noi_to_chuc, $ngay_bd, $ngay_kt, $nguoi_tham_gia);
 

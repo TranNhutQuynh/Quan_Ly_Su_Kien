@@ -5,13 +5,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Xác định đường dẫn tới file Controller từ vị trí hiện tại (user.php nằm trong app/views)
-$controllerPath = realpath(__DIR__ . '/../../controllers/NguoiDungController.php');
-if ($controllerPath && file_exists($controllerPath)) {
-    include_once $controllerPath;
-} else {
-    die("Không tìm thấy file NguoiDungController.php ở đường dẫn: " . __DIR__ . '/../controllers/NguoiDungController.php');
-}
+// Xác định đường dẫn tới file Controller
+require_once __DIR__ . '/../../controllers/NguoiDungController.php';
 
 // Tạo đối tượng controller
 $controller = new NguoiDungController();
@@ -22,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     exit();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -82,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
                 <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Đăng ký sự kiện mới</h5>
               </div>
               <div class="card-body">
-                <form id="eventRegistrationForm" method="POST">
+                <form id="eventRegistrationForm"  method="POST">
                   <div class="row mb-3">
                     <div class="col-md-6">
                       <label class="form-label">Tên người đăng ký</label>

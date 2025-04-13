@@ -1,3 +1,16 @@
+<?php
+  session_start();
+  require_once __DIR__."/../../controllers/ThanhToanController.php";
+
+  $controller = new ThanhToanController();
+  $thongTinTT = $controller->thongtinTT();
+  
+  // Format thông tin
+  $tongTien = $controller->formatCurrency($thongTinTT['gia_tien']);
+  $tienCocCanThanhToan = $controller->formatCurrency($thongTinTT['gia_tien'] * 0.5);
+  $ngayBatDau = $controller->formatDateTime($thongTinTT['ngay_bd']);
+  $ngayKetThuc = $controller->formatDateTime($thongTinTT['ngay_kt']);
+?>
 <!DOCTYPE html>
 <html lang="vi">
   <head>
@@ -36,12 +49,12 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto">
             <li class="nav-item">
-              <a class="nav-link" href="draft.html">
+              <a class="nav-link" href="/Quan_Ly_Su_Kien/app/views/NguoiDung/user.php">
                 <i class="fas fa-plus-circle me-1"></i>Đăng ký sự kiện
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="draft.html#viewEvents">
+              <a class="nav-link" href="/Quan_Ly_Su_Kien/app/views/NguoiDung/user.php#viewEvents">
                 <i class="fas fa-list me-1"></i>Sự kiện đã đăng ký
               </a>
             </li>
@@ -53,9 +66,9 @@
           </ul>
           <div class="d-flex align-items-center">
             <span class="user-welcome me-2">
-              <i class="fas fa-user-circle me-1"></i>Xin chào, Nguyễn Văn A
+              <i class="fas fa-user-circle me-1"></i>Xin chào, <?= $thongTinTT['ten_kh'] ?>
             </span>
-            <a href="phanquyen.html" class="btn btn-light btn-sm">
+            <a href="/Quan_Ly_Su_Kien/app/views/TrangChu/trangchu.php" class="btn btn-light btn-sm">
               <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
             </a>
           </div>
@@ -76,35 +89,32 @@
           <div class="alert alert-info mb-4">
             <div class="row">
               <div class="col-md-6">
-                <p class="mb-1"><strong>Mã sự kiện:</strong> SK002</p>
-                <p class="mb-1">
-                  <strong>Tên sự kiện:</strong> Tiệc cưới Nguyễn Văn A
-                </p>
-                <p class="mb-1">
-                  <strong>Thời gian:</strong> 20/05/2025 18:00 - 22:00
-                </p>
+                <p class="mb-1"><strong>Mã sự kiện:</strong> <?= $thongTinTT['ma_sk'] ?></p>
+                <p class="mb-1"><strong>Tên sự kiện:</strong> <?= $thongTinTT['ten_sk'] ?></p>
+                <p class="mb-1"><strong>Loại sự kiện:</strong> <?= ucfirst($thongTinTT['loai_sk']) ?></p>
+                <p class="mb-1"><strong>Người đăng ký:</strong> <?= $thongTinTT['ten_kh'] ?></p>
+                <p class="mb-1"><strong>Số điện thoại:</strong> <?= $thongTinTT['sdt'] ?></p>
+                <p class="mb-1"><strong>Địa điểm:</strong> <?= $thongTinTT['noi_to_chuc'] ?></p>
               </div>
               <div class="col-md-6">
-                <p class="mb-1">
-                  <strong>Tổng số tiền:</strong> 45,000,000 VNĐ
-                </p>
-                <p class="mb-1">
-                  <strong>Cần thanh toán:</strong> 22,500,000 VNĐ
-                </p>
+                <p class="mb-1"><strong>Thời gian bắt đầu:</strong> <?= $ngayBatDau ?></p>
+                <p class="mb-1"><strong>Thời gian kết thúc:</strong> <?= $ngayKetThuc ?></p>
+                <p class="mb-1"><strong>Số người tham gia:</strong> <?= $thongTinTT['nguoi_tham_gia'] ?> người</p>
+                <p class="mb-1"><strong>Tổng số tiền:</strong> <span class="text-danger fw-bold"><?= $tongTien ?></span></p>
+                <p class="mb-1"><strong>Cần thanh toán (đặt cọc 50%):</strong> <span class="text-danger fw-bold"><?= $tienCocCanThanhToan ?></span></p>
                 <p class="mb-1">
                   <strong>Trạng thái:</strong>
-                  <span class="payment-status text-warning"
-                    >Chờ thanh toán</span
-                  >
+                  <span class="payment-status text-warning fw-bold">Chờ thanh toán</span>
                 </p>
               </div>
             </div>
           </div>
 
-          <!-- Progress bar (nếu cần thiết) -->
+          <!-- Progress bar thanh toán -->
           <div class="mb-4">
-            <div class="progress">
-              <div class="progress-bar" style="width: 50%"></div>
+            <h5 class="text-center mb-2">Tiến độ thanh toán</h5>
+            <div class="progress" style="height: 25px;">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
             </div>
           </div>
 
@@ -177,14 +187,14 @@
                         <li>Ngân hàng: Vietcombank</li>
                         <li>Số TK: 123456789</li>
                         <li>Chủ TK: Công Ty XYZ</li>
-                        <li>Nội dung: SK002_ABC</li>
+                        <li>Nội dung: SK<?= $thongTinTT['ma_sk'] ?>_<?= $thongTinTT['ten_kh'] ?></li>
                       </ul>
                     </div>
                     <div class="col-md-6 text-center">
                       <h5><i class="fas fa-qrcode me-2"></i>QR Code</h5>
                       <img
-                        src="https://fsviet.com/image/data/ma-qr-code-la-gi1.jpg"
-                        alt="QR Code"
+                        src="/api/placeholder/150/150"
+                        alt="QR Code Thanh Toán"
                         class="img-fluid mb-2"
                       />
                       <p class="small text-muted">Quét mã để thanh toán</p>
@@ -195,12 +205,33 @@
             </div>
           </div>
 
+          <!-- Thông tin thêm và ghi chú -->
+          <div class="mb-4 mt-3">
+            <div class="card">
+              <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin thanh toán</h5>
+              </div>
+              <div class="card-body">
+                <ul>
+                  <li>Vui lòng đặt cọc <strong>50%</strong> tổng chi phí để xác nhận đăng ký sự kiện</li>
+                  <li>Số tiền còn lại sẽ được thanh toán sau khi kết thúc sự kiện</li>
+                  <li>Trong trường hợp hủy sự kiện, số tiền cọc sẽ không được hoàn lại</li>
+                  <li>Vui lòng liên hệ <strong>028 1234 5678</strong> nếu cần hỗ trợ thêm</li>
+                </ul>
+                <div class="form-floating mt-3">
+                  <textarea class="form-control" id="paymentNote" style="height: 100px" placeholder="Ghi chú thanh toán"></textarea>
+                  <label for="paymentNote">Ghi chú thanh toán (nếu có)</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Nút hành động thanh toán -->
           <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
             <button class="btn btn-secondary btn-lg" id="cancelPayment">
               <i class="fas fa-times me-2"></i>Hủy bỏ
             </button>
-            <button class="btn btn-success btn-lg" id="confirmPayment">
+            <button class="btn btn-success btn-lg" id="confirmPayment" data-bs-toggle="modal" data-bs-target="#successModal">
               <i class="fas fa-check-circle me-2"></i>Xác nhận thanh toán
             </button>
           </div>
@@ -229,18 +260,59 @@
               style="font-size: 60px"
             ></i>
             <h4>Đã thanh toán thành công!</h4>
-            <p class="text-muted">Mã giao dịch: #PAY123456</p>
+            <p>Cảm ơn <strong><?= $thongTinTT['ten_kh'] ?></strong> đã đăng ký và thanh toán!</p>
+            <p class="text-muted">Mã giao dịch: #PAY<?= mt_rand(100000, 999999) ?></p>
+            <p>Thông tin xác nhận đã được gửi đến email của bạn.</p>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary" data-bs-dismiss="modal">
+            <a href="/Quan_Ly_Su_Kien/app/views/NguoiDung/user.php" class="btn btn-primary">
               <i class="fas fa-home me-2"></i>Về trang chủ
+            </a>
+            <button class="btn btn-success" data-bs-dismiss="modal">
+              <i class="fas fa-print me-2"></i>In biên lai
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Script thanh toán (có thể thêm xử lý JS tùy theo yêu cầu) -->
-    <script src="/public/assets/JS/thanhtoan.js"></script>
+    <!-- Script thanh toán -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý nút hủy bỏ
+        document.getElementById('cancelPayment').addEventListener('click', function() {
+          if (confirm('Bạn có chắc muốn hủy thanh toán này?')) {
+            window.location.href = '/Quan_Ly_Su_Kien/app/views/NguoiDung/user.php';
+          }
+        });
+        
+        // Xử lý chuyển đổi phương thức thanh toán
+        const cashMethod = document.getElementById('cashMethod');
+        const bankMethod = document.getElementById('bankMethod');
+        
+        cashMethod.addEventListener('change', function() {
+          if (this.checked) {
+            // Logic khi chọn thanh toán tiền mặt
+            console.log('Đã chọn phương thức thanh toán tiền mặt');
+          }
+        });
+        
+        bankMethod.addEventListener('change', function() {
+          if (this.checked) {
+            // Logic khi chọn thanh toán chuyển khoản
+            console.log('Đã chọn phương thức thanh toán chuyển khoản');
+          }
+        });
+        
+        // Xử lý nút xác nhận thanh toán
+        document.getElementById('confirmPayment').addEventListener('click', function() {
+          // Cập nhật progress bar khi xác nhận thanh toán
+          document.querySelector('.progress-bar').style.width = '50%';
+          document.querySelector('.progress-bar').innerText = '50%';
+          
+          // Thêm logic lưu thông tin thanh toán ở đây nếu cần
+        });
+      });
+    </script>
   </body>
 </html>
