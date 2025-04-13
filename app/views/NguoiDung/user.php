@@ -55,9 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
           </ul>
           <div class="d-flex align-items-center">
             <span class="user-welcome">
-              <i class="fas fa-user-circle me-1"></i> Xin chào, Nguyễn Văn A
+              <?php if (isset($_SESSION['avatar']) && !empty($_SESSION['avatar'])): ?>
+                <img class="user-avatar" src="../public/assets/images/avatars/<?php echo htmlspecialchars($_SESSION['avatar']); ?>" alt="Avatar">
+              <?php else: ?>
+                <i class="fas fa-user-circle me-1"></i>
+              <?php endif; ?>
+              Xin chào, <?php echo htmlspecialchars($_SESSION['username'] ?? 'Khách'); ?>
             </span>
-            <a href="phanquyen.html" class="btn btn-light btn-sm ms-2">
+            <a href="../auth/logout.php" class="btn btn-light btn-sm ms-2">
               <i class="fas fa-sign-out-alt me-1"></i> Đăng xuất
             </a>
           </div>

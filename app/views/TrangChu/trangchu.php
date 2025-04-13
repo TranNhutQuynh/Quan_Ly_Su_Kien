@@ -60,7 +60,7 @@ error_reporting(E_ALL);
         <a href="#contact">Liên hệ</a>
       </div>
       <div class="auth-links" id="authLinks">
-        <a href="login.html" id="loginBtn">Đăng nhập</a>
+        <a href="/Quan_Ly_Su_Kien/app/views/auth/phanquyen.php" id="loginBtn">Đăng nhập</a>
         <a href="signup.html" id="registerBtn">Đăng ký</a>
       </div>
     </div>

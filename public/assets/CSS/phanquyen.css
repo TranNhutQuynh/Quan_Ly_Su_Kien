@@ -1,80 +1,228 @@
-body {
-  background: linear-gradient(to right, #87d5e9, #2575fc);
-  margin: 0;
+:root {
+  --primary-color: #4a6baf;
+  --secondary-color: #6c7ae0;
+  --accent-color: #8e9ff3;
+  --dark-color: #2c3e50;
+  --light-color: #f8f9fa;
+  --danger-color: #e74c3c;
+  --success-color: #2ecc71;
 }
-/* Căn giữa biểu mẫu trong màn hình */
-.container {
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f4f7fc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-container {
+  display: flex;
+  max-width: 900px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.login-image {
+  flex: 1;
+  background-image: url("https://source.unsplash.com/random/900×700/?event");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-image::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(74, 107, 175, 0.7);
+}
+
+.logo-container {
+  position: relative;
+  text-align: center;
+  color: white;
+}
+
+.logo-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.logo-container p {
+  font-size: 1.1rem;
+}
+
+.login-form {
+  flex: 1;
+  padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
-  /* Đảm bảo container chiếm toàn bộ chiều cao màn hình */
-  border: 1px solid red;
 }
-/* Form người dùng và quản lý */
-.form-customer,
-.form-admin {
-  border: 1px solid grey;
-  padding: 20px;
-  width: 500px;
-  cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border-radius: 8px;
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header h2 {
+  color: var(--dark-color);
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.login-header p {
+  color: #777;
+}
+
+.input-group {
+  margin-bottom: 20px;
   position: relative;
-  z-index: 10;
 }
 
-/* Đảm bảo các form ban đầu ẩn */
-.customer,
-.admin {
-  display: none;
-}
-
-/* Khi có lớp 'active', form sẽ hiển thị */
-.form-customer.active .customer,
-.form-admin.active .admin {
+.input-group label {
   display: block;
+  margin-bottom: 8px;
+  color: var(--dark-color);
+  font-weight: 500;
 }
-body {
-  background: linear-gradient(to right, #87d5e9, #2575fc);
-  margin: 0;
+
+.input-group input {
+  width: 100%;
+  padding: 12px 15px 12px 40px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s;
 }
-/* Căn giữa biểu mẫu trong màn hình */
-.container {
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+}
+
+.input-group i {
+  position: absolute;
+  left: 15px;
+  top: 42px;
+  color: #999;
+}
+
+.error-message {
+  color: var(--danger-color);
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.remember-forgot {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  height: 100vh;
-  /* Đảm bảo container chiếm toàn bộ chiều cao màn hình */
-  border: 1px solid red;
+  margin-bottom: 25px;
+  font-size: 0.9rem;
 }
-/* Form người dùng và quản lý */
-.form-customer,
-.form-admin {
-  border: 1px solid grey;
-  padding: 20px;
-  width: 500px;
+
+.remember-me {
+  display: flex;
+  align-items: center;
+}
+
+.remember-me input {
+  margin-right: 8px;
+}
+
+.forgot-password {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.login-button {
+  background: linear-gradient(
+    to right,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 16px;
   cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border-radius: 8px;
-  position: relative;
-  z-index: 10;
+  transition: all 0.3s;
+  font-weight: 600;
 }
 
-/* Đảm bảo các form ban đầu ẩn */
-.customer,
-.admin {
-  display: none;
+.login-button:hover {
+  background: linear-gradient(
+    to right,
+    var(--secondary-color),
+    var(--accent-color)
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(108, 122, 224, 0.4);
 }
 
-/* Khi có lớp 'active', form sẽ hiển thị */
-.form-customer.active .customer,
-.form-admin.active .admin {
-  display: block;
+.register-link {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 0.95rem;
+}
+
+.register-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+.back-to-home {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  z-index: 1;
+}
+
+.back-to-home i {
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    max-width: 400px;
+  }
+
+  .login-image {
+    min-height: 200px;
+  }
 }
