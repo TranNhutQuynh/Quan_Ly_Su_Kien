@@ -1,5 +1,13 @@
 <?php
 require_once __DIR__ . '/../models/QuanLyModel.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class QuanLyController {
     private $model;
@@ -8,120 +16,176 @@ class QuanLyController {
         $this->model = new QuanLyModel();
     }
     
-    // Lấy danh sách các sự kiện cho phần quản lý thanh toán
     public function getPaymentList($status = 'all', $search = '', $page = 1) {
         return $this->model->getAllEvents($status, $search, $page);
     }
     
-    // Đếm tổng số sự kiện để phân trang
     public function countEvents($status = 'all', $search = '') {
         return $this->model->countEvents($status, $search);
     }
     
-    // Lấy chi tiết sự kiện
-    public function getEventDetail($eventId) {
-        return $this->model->getEventDetail($eventId);
+    public function updatePaymentStatus($eventId, $status, $method = null) {
+        return $this->model->updatePaymentStatus($eventId, $status, $method);
     }
     
-    // Cập nhật trạng thái thanh toán
-    public function updatePaymentStatus($eventId, $status, $method = null, $note = null) {
-        return $this->model->updatePaymentStatus($eventId, $status, $method, $note);
-    }
-    
-    // Lấy thống kê doanh thu theo tháng
-    public function getRevenueByMonth($year) {
-        return $this->model->getRevenueByMonth($year);
-    }
-    
-    // Lấy thống kê doanh thu theo năm
-    public function getRevenueByYear() {
-        return $this->model->getRevenueByYear();
-    }
-    
-    // Lấy danh sách các năm
-    public function getYearsList() {
-        return $this->model->getYearsList();
-    }
-    
-    // Lấy thống kê theo loại sự kiện
-    public function getEventTypeStats($year = null) {
-        return $this->model->getEventTypeStats($year);
-    }
-    
-    // Lấy thống kê tổng quan
-    public function getOverallStats() {
-        return $this->model->getOverallStats();
-    }
-    
-    // Format tiền tệ
     public function formatCurrency($amount) {
         return number_format($amount, 0, ',', '.') . ' VNĐ';
     }
-    
-    // Format ngày tháng
-    public function formatDateTime($datetime) {
-        if (empty($datetime)) return "N/A";
-        $date = new DateTime($datetime);
-        return $date->format('d/m/Y H:i');
+
+    public function getAvailableYears() {
+        return $this->model->getAvailableYears();
     }
-    
-    // Cập nhật giá tiền cho sự kiện
-    public function createOrUpdateEvent($eventData) {
-        // TODO: Cập nhật dữ liệu cho sự kiện từ form quản lý
-    }
-    
-    // Xuất báo cáo thống kê
-    public function exportReport($type, $year = null) {
-        // Logic xuất báo cáo theo định dạng CSV hoặc PDF
-        $data = [];
-        $filename = "bao_cao_";
-        
-        switch ($type) {
-            case 'monthly':
-                $data = $this->getRevenueByMonth($year);
-                $filename .= "thang_" . $year . ".csv";
-                break;
-            case 'yearly':
-                $data = $this->getRevenueByYear();
-                $filename .= "nam.csv";
-                break;
-            case 'event_type':
-                $data = $this->getEventTypeStats($year);
-                $filename .= "loai_su_kien" . ($year ? "_" . $year : "") . ".csv";
-                break;
-            default:
-                $data = $this->getOverallStats();
-                $filename .= "tong_quan.csv";
-        }
-        
-        // Chuyển đổi dữ liệu thành định dạng CSV và tải xuống
-        $this->outputCSV($data, $filename);
-    }
-    
-    // Hàm hỗ trợ để xuất file CSV
-    private function outputCSV($data, $filename) {
-        // Thiết lập headers cho file download
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename=' . $filename);
-        
-        // Tạo file pointer cho output
-        $output = fopen('php://output', 'w');
-        
-        // Thêm BOM cho UTF-8
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-        
-        // Nếu có dữ liệu, thêm tiêu đề và dữ liệu
-        if (!empty($data)) {
-            // Lấy tiêu đề từ khóa của mảng đầu tiên
-            fputcsv($output, array_keys($data[0]));
-            
-            // Thêm dữ liệu từng dòng
-            foreach ($data as $row) {
-                fputcsv($output, $row);
+
+    public function exportStatistics($type, $month = null, $year = null) {
+        try {
+            // Tạo spreadsheet
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Thiết lập font hỗ trợ tiếng Việt
+            $sheet->getStyle('A1:Z999')->getFont()->setName('Arial')->setSize(11);
+
+            // Tiêu đề file
+            $sheet->setCellValue('A1', 'Thống kê sự kiện');
+            $sheet->mergeCells('A1:D1');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->setCellValue('A2', 'Ngày xuất: ' . date('d/m/Y H:i:s'));
+            $sheet->mergeCells('A2:D2');
+            $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            // Xử lý từng loại thống kê
+            if ($type === 'event_count') {
+                // Thống kê số lượng sự kiện theo tháng, năm
+                $data = $this->model->countEventsByMonthYear($month, $year);
+                
+                // Tiêu đề cột
+                $sheet->setCellValue('A4', 'Năm');
+                $sheet->setCellValue('B4', 'Tháng');
+                $sheet->setCellValue('C4', 'Số lượng sự kiện');
+                $sheet->getStyle('A4:C4')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('007BFF');
+                $sheet->getStyle('A4:C4')->getFont()->setBold(true)->getColor()->setARGB('FFFFFF');
+                $sheet->getStyle('A4:C4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('A4:C4')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+                // Dữ liệu
+                $row = 5;
+                $totalEvents = 0;
+                foreach ($data as $item) {
+                    $sheet->setCellValue('A' . $row, $item['nam']);
+                    $sheet->setCellValue('B' . $row, $item['thang']);
+                    $sheet->setCellValue('C' . $row, $item['so_luong']);
+                    $sheet->getStyle('A' . $row . ':C' . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                    $totalEvents += $item['so_luong'];
+                    $row++;
+                }
+
+                // Dòng tổng hợp
+                $sheet->setCellValue('A' . $row, 'Tổng');
+                $sheet->mergeCells('A' . $row . ':B' . $row);
+                $sheet->setCellValue('C' . $row, $totalEvents);
+                $sheet->getStyle('A' . $row . ':C' . $row)->getFont()->setBold(true);
+                $sheet->getStyle('A' . $row . ':C' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('E9ECEF');
+                $sheet->getStyle('A' . $row . ':C' . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+                // Tự động điều chỉnh độ rộng cột
+                foreach (range('A', 'C') as $col) {
+                    $sheet->getColumnDimension($col)->setAutoSize(true);
+                }
+            } elseif ($type === 'event_type') {
+                // Thống kê số lượng sự kiện theo loại, tháng, năm
+                $data = $this->model->countEventsByTypeMonthYear($month, $year);
+                
+                // Tiêu đề cột
+                $sheet->setCellValue('A4', 'Năm');
+                $sheet->setCellValue('B4', 'Tháng');
+                $sheet->setCellValue('C4', 'Loại sự kiện');
+                $sheet->setCellValue('D4', 'Số lượng');
+                $sheet->getStyle('A4:D4')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('007BFF');
+                $sheet->getStyle('A4:D4')->getFont()->setBold(true)->getColor()->setARGB('FFFFFF');
+                $sheet->getStyle('A4:D4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('A4:D4')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+                // Dữ liệu
+                $row = 5;
+                $totalEvents = 0;
+                foreach ($data as $item) {
+                    $sheet->setCellValue('A' . $row, $item['nam']);
+                    $sheet->setCellValue('B' . $row, $item['thang']);
+                    $sheet->setCellValue('C' . $row, ucfirst($item['LOAI_SK']));
+                    $sheet->setCellValue('D' . $row, $item['so_luong']);
+                    $sheet->getStyle('A' . $row . ':D' . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                    $totalEvents += $item['so_luong'];
+                    $row++;
+                }
+
+                // Dòng tổng hợp
+                $sheet->setCellValue('A' . $row, 'Tổng');
+                $sheet->mergeCells('A' . $row . ':C' . $row);
+                $sheet->setCellValue('D' . $row, $totalEvents);
+                $sheet->getStyle('A' . $row . ':D' . $row)->getFont()->setBold(true);
+                $sheet->getStyle('A' . $row . ':D' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('E9ECEF');
+                $sheet->getStyle('A' . $row . ':D' . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+                // Tự động điều chỉnh độ rộng cột
+                foreach (range('A', 'D') as $col) {
+                    $sheet->getColumnDimension($col)->setAutoSize(true);
+                }
+            } elseif ($type === 'revenue') {
+                // Thống kê doanh thu theo tháng, năm
+                $data = $this->model->revenueByMonthYear($month, $year);
+                
+                // Tiêu đề cột
+                $sheet->setCellValue('A4', 'Năm');
+                $sheet->setCellValue('B4', 'Tháng');
+                $sheet->setCellValue('C4', 'Doanh thu (VNĐ)');
+                $sheet->getStyle('A4:C4')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('007BFF');
+                $sheet->getStyle('A4:C4')->getFont()->setBold(true)->getColor()->setARGB('FFFFFF');
+                $sheet->getStyle('A4:C4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('A4:C4')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+                // Dữ liệu
+                $row = 5;
+                $totalRevenue = 0;
+                foreach ($data as $item) {
+                    $sheet->setCellValue('A' . $row, $item['nam']);
+                    $sheet->setCellValue('B' . $row, $item['thang']);
+                    $sheet->setCellValue('C' . $row, $item['doanh_thu']);
+                    $sheet->getStyle('C' . $row)->getNumberFormat()->setFormatCode('#,##0');
+                    $sheet->getStyle('A' . $row . ':C' . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                    $totalRevenue += $item['doanh_thu'];
+                    $row++;
+                }
+
+                // Dòng tổng hợp
+                $sheet->setCellValue('A' . $row, 'Tổng');
+                $sheet->mergeCells('A' . $row . ':B' . $row);
+                $sheet->setCellValue('C' . $row, $totalRevenue);
+                $sheet->getStyle('C' . $row)->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->getStyle('A' . $row . ':C' . $row)->getFont()->setBold(true);
+                $sheet->getStyle('A' . $row . ':C' . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('E9ECEF');
+                $sheet->getStyle('A' . $row . ':C' . $row)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+                // Tự động điều chỉnh độ rộng cột
+                foreach (range('A', 'C') as $col) {
+                    $sheet->getColumnDimension($col)->setAutoSize(true);
+                }
             }
+
+            // Xuất file
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="thong_ke_' . $type . '_' . date('Ymd_His') . '.xlsx"');
+            header('Cache-Control: max-age=0');
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit;
+        } catch (Exception $e) {
+            error_log('Lỗi xuất thống kê Excel: ' . $e->getMessage());
+            header('Content-Type: text/html; charset=utf-8');
+            echo '<h1>Lỗi xuất thống kê</h1><p>' . htmlspecialchars($e->getMessage()) . '</p>';
+            exit;
         }
-        
-        fclose($output);
-        exit;
     }
 }
+?>

@@ -61,7 +61,7 @@ error_reporting(E_ALL);
       </div>
       <div class="auth-links" id="authLinks">
         <a href="/Quan_Ly_Su_Kien/app/views/auth/phanquyen.php" id="loginBtn">Đăng nhập</a>
-        <a href="signup.html" id="registerBtn">Đăng ký</a>
+        <a href="../auth/SignUp.php" id="registerBtn">Đăng ký</a>
       </div>
     </div>
   </nav>
